@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Tracker</title>
+    <style>
+        :root {
+            --bg-dark: #121318; /* Rich deep charcoal */
+            --panel-glass: rgba(22, 24, 33, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --neon-purple: #8a2be2;
+            --neon-cyan: #00f2fe;
+            --text-main: #ffffff;
+            --text-muted: #8e92a2;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Faint Geometric Grid Pattern */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Glowing Background Accents */
+        .bg-glow-1 {
+            position: fixed;
+            top: -120px;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.22) 0%, rgba(138, 43, 226, 0.03) 60%, transparent 80%);
+            z-index: -1;
+            filter: blur(50px);
+            animation: floatGlow1 14s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        .bg-glow-2 {
+            position: fixed;
+            bottom: -120px;
+            right: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.18) 0%, rgba(0, 242, 254, 0.02) 60%, transparent 80%);
+            z-index: -1;
+            filter: blur(60px);
+            animation: floatGlow2 16s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes floatGlow1 {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+            50% { transform: translate(100px, 60px) scale(1.15); opacity: 1; }
+            100% { transform: translate(-40px, 120px) scale(0.9); opacity: 0.7; }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            50% { transform: translate(-120px, -80px) scale(1.2); opacity: 0.95; }
+            100% { transform: translate(50px, -140px) scale(0.85); opacity: 0.6; }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .logo {
+            font-size: 2.5rem; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        header p { color: var(--text-muted); margin-top: 5px; font-size: 0.95rem; }
+
+        .dashboard {
+            display: grid; grid-template-columns: 2.2fr 1fr; gap: 30px;
+            max-width: 1300px; margin: 0 auto;
+        }
+
+        .feed-section, .tracker-section {
+            background: var(--panel-glass);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px; padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .section-header h2, .tracker-section h2 { margin: 0; font-size: 1.3rem; letter-spacing: 0.5px; }
+
+        .pulse-dot {
+            width: 8px; height: 8px; background-color: var(--neon-cyan); border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 
+            0% { transform: scale(0.95); opacity: 0.5; } 
+            50% { transform: scale(1.2); opacity: 1; } 
+            100% { transform: scale(0.95); opacity: 0.5; } 
+        }
+
+        .media-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+        }
+
+        .media-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass); border-radius: 12px;
+            overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .media-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 242, 254, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 242, 254, 0.05);
+        }
+
+        .img-container { position: relative; width: 100%; height: 160px; background-color: #15151c; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .type-badge {
+            position: absolute; top: 10px; left: 10px; padding: 3px 8px;
+            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+            border-radius: 20px; color: #fff; background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2); letter-spacing: 0.5px;
+        }
+
+        .card-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-info h3 { margin: 0 0 5px 0; font-size: 1rem; font-weight: 600; line-height: 1.3; }
+        .card-info p { margin: 0 0 15px 0; font-size: 0.8rem; color: var(--text-muted); }
+
+        .add-btn {
+            width: 100%; border: 1px solid var(--neon-purple); background: transparent;
+            color: #fff; padding: 10px; font-weight: 600; font-size: 0.85rem;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .add-btn:hover {
+            background: var(--neon-purple); box-shadow: 0 0 15px rgba(138,43,226,0.5);
+        }
+
+        .counter-badge {
+            font-size: 0.8rem; color: var(--neon-cyan); font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; margin-top: 10px;
+        }
+        .tracker-list { list-style: none; padding: 0; margin: 0; }
+        .empty-state { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 40px 10px; }
+
+        /* Tracker Item Card Layout */
+        .tracker-item {
+            display: flex; flex-direction: column; gap: 8px;
+            padding: 14px 16px; background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass); border-radius: 10px; margin-bottom: 12px;
+            animation: slideIn 0.3s ease forwards;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .tracker-item-header { display: flex; justify-content: space-between; align-items: center; }
+        .item-title { font-size: 0.95rem; font-weight: 600; }
+        .item-type { font-size: 0.68rem; color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+
+        .tracker-details { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+        .detail-badge { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; color: #fff; }
+        .tracker-notes { font-size: 0.78rem; font-style: italic; color: #a0a5b5; margin-top: 2px; }
+
+        .action-btns { display: flex; gap: 8px; margin-top: 6px; justify-content: flex-end; }
+        .icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; transition: color 0.2s; }
+        .icon-btn:hover { color: var(--neon-cyan); }
+        .icon-btn.delete:hover { color: #ff4757; }
+
+        /* Modal Structure */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-content {
+            background: #181a24; border: 1px solid var(--border-glass);
+            border-radius: 16px; padding: 25px; width: 100%; max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+        }
+        .modal-content h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; color: var(--neon-cyan); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass); border-radius: 6px; color: #fff;
+            padding: 8px 12px; font-family: inherit; font-size: 0.85rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--neon-cyan);
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: transparent; border: 1px solid var(--border-glass); color: var(--text-muted); padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+        .btn-save { background: var(--neon-purple); border: none; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-save:hover { box-shadow: 0 0 10px rgba(138,43,226,0.6); }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <header>
+        <div class="logo">My Personal Tracker</div>
+        <p>The innovative ecosystem to log your digital footprint.</p>
+    </header>
+
+    <main class="dashboard">
+        <section class="feed-section">
+            <div class="section-header">
+                <h2>Trending Discoveries</h2>
+                <span class="pulse-dot"></span> Live Feed
+            </div>
+            
+            <div id="media-grid" class="media-grid"></div>
+        </section>
+
+        <section class="tracker-section">
+            <h2>My Active Database</h2>
+            <div id="tracker-counter" class="counter-badge">0 Items Logged</div>
+            
+            <ul id="tracker-list" class="tracker-list">
+                <li class="empty-state">No media archived yet. Click "Add to Tracker" to begin.</li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Dynamic Modal Form -->
+    <div id="detail-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title">Log Media Details</h3>
+            
+            <div id="dynamic-form-fields">
+                <!-- Dynamically injected fields go here -->
+            </div>
+
+            <div class="form-group">
+                <label for="track-rating">Rating (1 to 10)</label>
+                <input type="number" id="track-rating" min="1" max="10" placeholder="8">
+            </div>
+
+            <div class="form-group">
+                <label for="track-notes">Notes / Review</label>
+                <textarea id="track-notes" rows="3" placeholder="Add your thoughts or notes..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveItemDetails()">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const catalogData = [
+            { id: 1, name: "Cyberpunk 2077", type: "Game", desc: "Open-world action RPG set in Night City.", image: "images/cyberpunk2077.jpg" },
+            { id: 2, name: "Elden Ring", type: "Game", desc: "Action RPG in the Lands Between.", image: "images/eldenring.webp" },
+            { id: 3, name: "Lord of the Mysteries", type: "Novel", desc: "Steampunk fantasy webnovel with Cthulhu mythos.", image: "images/lotm.jpg" },
+            { id: 4, name: "Solo Leveling", type: "Manhwa", desc: "Famous gate-dungeon hunter webtoon.", image: "images/solo leveling.jpg" },
+            { id: 5, name: "The Omniscient Reader", type: "Manhwa", desc: "A reader survives an apocalyptic world of his favorite novel.", image: "images/orv.jpg" },
+            { id: 6, name: "The Beginning After The End", type: "Novel", desc: "King Grey reincarnates into a magic-filled continent.", image: "images/tbate.jpg" }
+        ];
+
+        let trackedItems = [];
+        let activeSelectedId = null;
+
+        const mediaGrid = document.getElementById('media-grid');
+        const trackerList = document.getElementById('tracker-list');
+        const trackerCounter = document.getElementById('tracker-counter');
+        const modal = document.getElementById('detail-modal');
+        const dynamicFormFields = document.getElementById('dynamic-form-fields');
+
+        function loadCatalog() {
+            mediaGrid.innerHTML = ""; 
+            
+            catalogData.forEach(item => {
+                const cardHtml = `
+                    <div class="media-card">
+                        <div class="img-container">
+                            <span class="type-badge">${item.type}</span>
+                            <img src="${item.image}" alt="${item.name}">
+                        </div>
+                        <div class="card-info">
+                            <div>
+                                <h3>${item.name}</h3>
+                                <p>${item.desc}</p>
+                            </div>
+                            <button class="add-btn" onclick="openModal(${item.id})">Add to Tracker</button>
+                        </div>
+                    </div>
+                `;
+                mediaGrid.innerHTML += cardHtml;
+            });
+        }
+
+        function openModal(itemId) {
+            activeSelectedId = itemId;
+            const existing = trackedItems.find(item => item.id === itemId);
+            const catalogItem = catalogData.find(item => item.id === itemId);
+
+            const mediaType = catalogItem.type;
+            document.getElementById('modal-title').innerText = `Track: ${catalogItem.name}`;
+
+            // Render type-specific form fields
+            if (mediaType === "Game") {
+                dynamicFormFields.innerHTML = `
+                    <div class="form-group">
+                        <label for="track-platform">Platform</label>
+                        <select id="track-platform">
+                            <option value="PC">PC</option>
+                            <option value="PlayStation">PlayStation</option>
+                            <option value="Xbox">Xbox</option>
+                            <option value="Nintendo Switch">Nintendo Switch</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="track-status">Status</label>
+                        <select id="track-status">
+                            <option value="Playing">Playing</option>
+                            <option value="Completed">Completed</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Backlog">Backlog</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="track-playtime">Playtime (Hours)</label>
+                        <input type="number" id="track-playtime" placeholder="e.g. 45">
+                    </div>
+                `;
+            } else {
+                dynamicFormFields.innerHTML = `
+                    <div class="form-group">
+                        <label for="track-status">Status</label>
+                        <select id="track-status">
+                            <option value="Reading">Reading</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Plan to Read">Plan to Read</option>
+                            <option value="On Hold">On Hold</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="track-progress">Progress (e.g. Chapter 45, Vol 2)</label>
+                        <input type="text" id="track-progress" placeholder="e.g. Chapter 120">
+                    </div>
+                `;
+            }
+
+            // Populate existing values if editing
+            if (existing) {
+                if (mediaType === "Game") {
+                    document.getElementById('track-platform').value = existing.platform || "PC";
+                    document.getElementById('track-status').value = existing.status || "Playing";
+                    document.getElementById('track-playtime').value = existing.playtime || "";
+                } else {
+                    document.getElementById('track-status').value = existing.status || "Reading";
+                    document.getElementById('track-progress').value = existing.progress || "";
+                }
+                document.getElementById('track-rating').value = existing.rating || "";
+                document.getElementById('track-notes').value = existing.notes || "";
+            } else {
+                document.getElementById('track-rating').value = "";
+                document.getElementById('track-notes').value = "";
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            activeSelectedId = null;
+        }
+
+        function saveItemDetails() {
+            if (!activeSelectedId) return;
+
+            const catalogItem = catalogData.find(element => element.id === activeSelectedId);
+            const mediaType = catalogItem.type;
+
+            const rating = document.getElementById('track-rating').value;
+            const notes = document.getElementById('track-notes').value.trim();
+
+            let itemDetails = {
+                ...catalogItem,
+                rating,
+                notes
+            };
+
+            if (mediaType === "Game") {
+                itemDetails.platform = document.getElementById('track-platform').value;
+                itemDetails.status = document.getElementById('track-status').value;
+                itemDetails.playtime = document.getElementById('track-playtime').value;
+            } else {
+                itemDetails.status = document.getElementById('track-status').value;
+                itemDetails.progress = document.getElementById('track-progress').value.trim();
+            }
+
+            const existingIndex = trackedItems.findIndex(item => item.id === activeSelectedId);
+
+            if (existingIndex > -1) {
+                trackedItems[existingIndex] = itemDetails;
+            } else {
+                trackedItems.push(itemDetails);
+            }
+
+            closeModal();
+            updateTrackerUI();
+        }
+
+        function deleteTrackedItem(itemId) {
+            trackedItems = trackedItems.filter(item => item.id !== itemId);
+            updateTrackerUI();
+        }
+
+        function updateTrackerUI() {
+            trackerList.innerHTML = "";
+            
+            if (trackedItems.length === 0) {
+                trackerList.innerHTML = `<li class="empty-state">No media archived yet. Click "Add to Tracker" to begin.</li>`;
+                trackerCounter.innerText = "0 Items Logged";
+                return;
+            }
+
+            trackerCounter.innerText = `${trackedItems.length} Item${trackedItems.length > 1 ? 's' : ''} Logged`;
+
+            trackedItems.forEach(item => {
+                const isGame = item.type === "Game";
+
+                const detailsHtml = isGame ? `
+                    <span class="detail-badge">${item.platform || 'PC'}</span>
+                    <span class="detail-badge">${item.status || 'Tracked'}</span>
+                    ${item.playtime ? `<span>Playtime: <strong>${item.playtime} hrs</strong></span>` : ''}
+                    ${item.rating ? `<span>Rating: <strong>${item.rating}/10</strong></span>` : ''}
+                ` : `
+                    <span class="detail-badge">${item.status || 'Tracked'}</span>
+                    ${item.progress ? `<span>Progress: <strong>${item.progress}</strong></span>` : ''}
+                    ${item.rating ? `<span>Rating: <strong>${item.rating}/10</strong></span>` : ''}
+                `;
+
+                const itemHtml = `
+                    <li class="tracker-item">
+                        <div class="tracker-item-header">
+                            <span class="item-title">${item.name}</span>
+                            <span class="item-type">${item.type}</span>
+                        </div>
+                        <div class="tracker-details">
+                            ${detailsHtml}
+                        </div>
+                        ${item.notes ? `<div class="tracker-notes">"${item.notes}"</div>` : ''}
+                        <div class="action-btns">
+                            <button class="icon-btn" onclick="openModal(${item.id})">Edit</button>
+                            <button class="icon-btn delete" onclick="deleteTrackedItem(${item.id})">Delete</button>
+                        </div>
+                    </li>
+                `;
+                trackerList.innerHTML += itemHtml;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCatalog);
+    </script>
+</body>
+</html>
