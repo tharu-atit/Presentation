@@ -6,7 +6,7 @@
     <title>My Personal Tracker</title>
     <style>
         :root {
-            --bg-dark: #121318; /* Rich deep charcoal */
+            --bg-dark: #121318; 
             --panel-glass: rgba(22, 24, 33, 0.7);
             --border-glass: rgba(255, 255, 255, 0.08);
             --neon-purple: #8a2be2;
@@ -26,7 +26,6 @@
             min-height: 100vh;
         }
 
-        /* Faint Geometric Grid Pattern */
         body::before {
             content: "";
             position: fixed;
@@ -42,7 +41,6 @@
             pointer-events: none;
         }
 
-        /* Glowing Background Accents */
         .bg-glow-1 {
             position: fixed;
             top: -120px;
@@ -164,7 +162,6 @@
         .tracker-list { list-style: none; padding: 0; margin: 0; }
         .empty-state { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 40px 10px; }
 
-        /* Tracker Item Card Layout */
         .tracker-item {
             display: flex; flex-direction: column; gap: 8px;
             padding: 14px 16px; background: rgba(255, 255, 255, 0.03);
@@ -186,7 +183,6 @@
         .icon-btn:hover { color: var(--neon-cyan); }
         .icon-btn.delete:hover { color: #ff4757; }
 
-        /* Modal Structure */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
@@ -249,7 +245,6 @@
         </section>
     </main>
 
-    <!-- Dynamic Modal Form -->
     <div id="detail-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modal-title">Log Media Details</h3>
@@ -369,7 +364,6 @@
                 `;
             }
 
-            // Populate existing values if editing
             if (existing) {
                 if (mediaType === "Game") {
                     document.getElementById('track-platform').value = existing.platform || "PC";
