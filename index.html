@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <header>
+        <div class="logo">My Personal Tracker</div>
+        <p>The innovative ecosystem to log your digital footprint.</p>
+    </header>
+
+    <main class="dashboard">
+        <section class="feed-section">
+            <div class="section-header">
+                <h2>Trending Discoveries</h2>
+                <span class="pulse-dot"></span> Live Feed
+            </div>
+            
+            <div id="media-grid" class="media-grid"></div>
+        </section>
+
+        <section class="tracker-section">
+            <h2>My Active Database</h2>
+            <div id="tracker-counter" class="counter-badge">0 Items Logged</div>
+            
+            <ul id="tracker-list" class="tracker-list">
+                <li class="empty-state">No media archived yet. Click "Add to Tracker" to begin.</li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Dynamic Modal Form -->
+    <div id="detail-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title">Log Media Details</h3>
+            
+            <div id="dynamic-form-fields">
+                <!-- Dynamically injected fields go here -->
+            </div>
+
+            <div class="form-group">
+                <label for="track-rating">Rating (1 to 10)</label>
+                <input type="number" id="track-rating" min="1" max="10" placeholder="8">
+            </div>
+
+            <div class="form-group">
+                <label for="track-notes">Notes / Review</label>
+                <textarea id="track-notes" rows="3" placeholder="Add your thoughts or notes..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveItemDetails()">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
